@@ -1,61 +1,58 @@
-import { View, StyleSheet } from 'react-native';
-import ImageViewer from '@/components/ImageViewer';
-import Button from '@/components/Button';
-import * as ImagePicker from 'expo-image-picker';
-import { useState } from 'react';
+import React from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
 
-const PlaceholderImage = require('@/assets/images/image.png');
-
-export default function Index() {
-  const [selectedImage, setSelectedImage] = useState<string | undefined>(
-    undefined,
-  );
-
-  const pickImageAsync = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setSelectedImage(result.assets[0].uri);
-    } else {
-      alert('You did not select any image.');
-    }
-  };
-
+export default function AboutScreen() {
   return (
-    <View style={styles.container}>
-      <View style={styles.imageContainer}>
-        <ImageViewer
-          imgSource={PlaceholderImage}
-          selectedImage={selectedImage}
-        />
+    <View className="flex-1 bg-black px-4 py-6">
+      {/* 검색바 */}
+      <TextInput
+        className="bg-gray-800 text-white px-4 py-2 rounded-lg mb-6"
+        placeholder="검색"
+        placeholderTextColor="#aaa"
+      />
+
+      {/* 카드 그룹 */}
+      <View className="flex-row flex-wrap justify-between gap-4">
+        {/* 카드 */}
+        <View className="bg-gray-800 rounded-lg p-4 w-[48%] flex items-center justify-between">
+          <Text className="text-blue-400 text-lg font-bold">오늘</Text>
+          <Text className="text-white text-xl">0</Text>
+        </View>
+
+        <View className="bg-gray-800 rounded-lg p-4 w-[48%] flex items-center justify-between">
+          <Text className="text-gray-400 text-lg font-bold">전체</Text>
+          <Text className="text-white text-xl">0</Text>
+        </View>
+
+        <View className="bg-gray-800 rounded-lg p-4 w-[48%] flex items-center justify-between">
+          <Text className="text-blue-400 text-lg font-bold">흐</Text>
+          <Text className="text-white text-xl">0</Text>
+        </View>
+
+        <View className="bg-gray-800 rounded-lg p-4 w-[48%] flex items-center justify-between">
+          <Text className="text-blue-400 text-lg font-bold">미리 알림</Text>
+          <Text className="text-white text-xl">0</Text>
+        </View>
+
+        <View className="bg-gray-800 rounded-lg p-4 w-[48%] flex items-center justify-between">
+          <Text className="text-green-400 text-lg font-bold">할당</Text>
+          <Text className="text-white text-xl">0</Text>
+        </View>
       </View>
-      <View style={styles.footerContainer}>
-        <Button
-          theme="primary"
-          label="Choose a photo"
-          onPress={pickImageAsync}
-        />
-        <Button label="Use this photo" />
+
+      <View className="mt-8">
+        <Text className="text-white text-lg font-bold mb-4">나의 목록</Text>
+        <TouchableOpacity className="bg-gray-800 rounded-lg p-4 flex flex-row items-center justify-between">
+          <Text className="text-white">최근 삭제된 항목</Text>
+          <Text className="text-white">4</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#25292e',
-    alignItems: 'center',
-  },
-  imageContainer: {
-    flex: 1,
-  },
-  footerContainer: {
-    flex: 1 / 3,
-    alignItems: 'center',
-  },
-});
