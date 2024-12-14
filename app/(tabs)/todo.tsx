@@ -1,52 +1,79 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { supabase } from '@/lib/supabase';
 
 export default function App() {
-  const [todos, setTodos] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const getTodos = async () => {
-    setLoading(true); // 로딩 상태 시작
+  const fetchData = async () => {
+    setLoading(true);
+
     try {
-      let { data: todos, error } = await supabase.from('todos').select('*');
+      const { data: projectsData, error: projectsError } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('user_id', 'ea085556-d21f-4682-8f68-744d4edadef0');
 
-      if (error) {
-        console.error('Error fetching todos:', error.message);
-        return;
-      }
+      if (projectsError) throw projectsError;
+      setProjects(projectsData);
 
-      setTodos(todos || []);
+      const { data: tasksData, error: tasksError } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('user_id', 'ea085556-d21f-4682-8f68-744d4edadef0');
+
+      if (tasksError) throw tasksError;
+      setTasks(tasksData);
     } catch (error) {
-      console.error('Error fetching todos:', error.message);
+      console.error('Error fetching data:', error);
     } finally {
-      setLoading(false); // 로딩 상태 종료
+      setLoading(false);
     }
   };
 
-  useFocusEffect(
-    React.useCallback(() => {
-      getTodos();
-    }, []),
-  );
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text>Loading...</Text>
+      <View className="flex-1 justify-center items-center bg-gray-100">
+        <Text className="text-lg font-bold">Loading...</Text>
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Todo List</Text>
+    <View className="flex-1 p-4 bg-white">
+      <Text className="text-2xl font-bold mb-4">Projects</Text>
       <FlatList
-        data={todos}
+        data={projects}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <View className="p-4 bg-gray-100 rounded-lg mb-2 shadow">
+            <Text className="text-xl font-semibold">{item.project_name}</Text>
+            <Text className="text-gray-600">{item.description}</Text>
+          </View>
+        )}
+      />
+
+      <Text className="text-2xl font-bold mt-6 mb-4">Tasks</Text>
+      <FlatList
+        data={tasks}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <Text>{item.title}</Text>}
+        renderItem={({ item }) => (
+          <View className="p-4 bg-gray-100 rounded-lg mb-2 shadow">
+            <Text className="text-lg font-semibold">{item.task_name}</Text>
+            <Text className="text-gray-600">{item.description}</Text>
+            <Text className="text-sm text-gray-500">Status: {item.status}</Text>
+            <Text className="text-sm text-gray-500">
+              Priority: {item.priority}
+            </Text>
+          </View>
+        )}
       />
     </View>
   );
