@@ -1,11 +1,17 @@
 {
   "extends": "expo/tsconfig.base",
+
   "compilerOptions": {
+    "esModuleInterop": true, // CommonJS와 ES 모듈 호환성 활성화
+    "skipLibCheck": true, // 타입 검사를 일부 스킵하여 성능 개선 (선택 사항)
+    "jsx": "react-native", // JSX 설정 (React Native 프로젝트일 경우)
+    "target": "esnext",
+    "module": "esnext",
     "strict": true,
+    "moduleResolution": "node",
+    "baseUrl": "./",
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     }
   },
   "include": [

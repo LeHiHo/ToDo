@@ -6,34 +6,40 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
-import { supabase } from '@/api';
+import { useRouter } from 'expo-router';
+import { Ionicons, MaterialIcons, FontAwesome } from '@expo/vector-icons';
+import { fetchProjects } from '@/api/project';
+import { fetchTasks } from '@/api/tasks';
+import { ProjectsData } from '@/@types/projects.types';
+import { TasksData } from '@/@types/tasks.types';
+import CustomModal from '@/components/CustomModal';
 
 export default function App() {
-  const [projects, setProjects] = useState([]);
-  const [tasks, setTasks] = useState([]);
+  const [projects, setProjects] = useState<ProjectsData[]>([]);
+  const [tasks, setTasks] = useState<TasksData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const handleSave = (data: string) => {
+    console.log('Saved data:', data);
+    setModalVisible(false); // 모달 닫기
+  };
+
+  const router = useRouter();
 
   const fetchData = async () => {
     setLoading(true);
-
     try {
-      const { data: projectsData, error: projectsError } = await supabase
-        .from('projects')
-        .select('*')
-        .eq('user_id', 'ea085556-d21f-4682-8f68-744d4edadef0');
+      // fetchProjects로 프로젝트 데이터 가져오기
+      const userId = 'ea085556-d21f-4682-8f68-744d4edadef0';
+      const projectsData = await fetchProjects(userId);
+      const tasksData = await fetchTasks(userId);
+      console.log(projectsData);
 
-      if (projectsError) throw projectsError;
       setProjects(projectsData);
-
-      const { data: tasksData, error: tasksError } = await supabase
-        .from('tasks')
-        .select('*')
-        .eq('user_id', 'ea085556-d21f-4682-8f68-744d4edadef0');
-
-      if (tasksError) throw tasksError;
       setTasks(tasksData);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Error fetching data:', error.message);
     } finally {
       setLoading(false);
     }
@@ -53,43 +59,56 @@ export default function App() {
 
   return (
     <View className="flex-1 bg-black px-4 py-6">
-      {/* 검색바 */}
-      <TextInput
-        className="bg-gray-800 text-white px-4 py-2 rounded-lg mb-6"
-        placeholder="검색"
-        placeholderTextColor="#aaa"
-      />
+      {/* 헤더 */}
+      <View className="flex justify-center items-end mb-4">
+        <TouchableOpacity onPress={() => router.push('/about')}>
+          <Ionicons name="person" size={32} color="white" />
+        </TouchableOpacity>
+      </View>
 
-      {/* 카드 그룹 */}
-      <View className="flex-row flex-wrap justify-between gap-4">
-        {/* Projects 카드 */}
-        <View className="bg-gray-800 rounded-lg p-4 w-[48%] flex items-center justify-between">
-          <Text className="text-blue-400 text-lg font-bold">Projects</Text>
-          <Text className="text-white text-xl">{projects.length}</Text>
-        </View>
-
-        {/* Tasks 카드 */}
-        <View className="bg-gray-800 rounded-lg p-4 w-[48%] flex items-center justify-between">
-          <Text className="text-green-400 text-lg font-bold">Tasks</Text>
-          <Text className="text-white text-xl">{tasks.length}</Text>
+      {/* 바디 */}
+      <View className="flex-1">
+        <View className="flex-row flex-wrap justify-between gap-4">
+          {projects.map((project) => (
+            <View
+              key={project.id}
+              className="bg-gray-800 rounded-lg p-4 w-[100%] flex items-center justify-between flex-row">
+              <View className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center mr-3" />
+              <Text className="text-white text-xl font-bold">
+                {project.project_name}
+              </Text>
+              <Text className="text-white text-xl font-bold">
+                {tasks.length}
+              </Text>
+            </View>
+          ))}
         </View>
       </View>
 
-      {/* 리스트 */}
-      <View className="mt-8">
-        <Text className="text-white text-lg font-bold mb-4">나의 목록</Text>
-
-        {/* 최근 프로젝트 */}
-        <TouchableOpacity className="bg-gray-800 rounded-lg p-4 flex flex-row items-center justify-between mb-4">
-          <Text className="text-white">최근 프로젝트</Text>
-          <Text className="text-white">{projects.length}</Text>
+      {/* 푸터 */}
+      <View className="flex flex-row py-4 bg-gray-90 justify-between">
+        <TouchableOpacity
+          onPress={() => {
+            console.log('Add new task');
+          }}
+          className="flex-row items-center justify-center">
+          <FontAwesome name="plus-circle" size={32} color="white" />
+          <Text className="color-white font-extrabold ml-4">할일 추가</Text>
         </TouchableOpacity>
-
-        {/* 최근 작업 */}
-        <TouchableOpacity className="bg-gray-800 rounded-lg p-4 flex flex-row items-center justify-between">
-          <Text className="text-white">최근 작업</Text>
-          <Text className="text-white">{tasks.length}</Text>
+        <TouchableOpacity
+          onPress={() => setModalVisible(true)}
+          className="flex-row items-center justify-center">
+          <Text className="color-white font-extrabold underline">
+            프로젝트 추가
+          </Text>
         </TouchableOpacity>
+        <CustomModal
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+          onSave={handleSave}
+          title="새 프로젝트 추가"
+          placeholder="프로젝트 이름 입력"
+        />
       </View>
     </View>
   );
