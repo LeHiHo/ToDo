@@ -16,14 +16,17 @@ export const fetchProjects = async (userId: string) => {
 
 // 프로젝트 생성
 export const createProject = async (payload: {
-  name: string;
-  userId: string;
+  project_name: string;
+  // user_id: string;
 }) => {
-  const { data, error } = await supabase.from('projects').insert([payload]);
+  const { data, error } = await supabase
+    .from('projects')
+    .insert([payload])
+    .select('*');
 
   if (error) {
     throw new Error(`프로젝트를 추가하는 중 오류 발생: ${error.message}`);
   }
 
-  return data;
+  return data || [];
 };
