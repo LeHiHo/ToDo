@@ -30,7 +30,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
       transparent={true}
       visible={visible}
       onRequestClose={onClose}>
-      <View className="flex-1 justify-center items-center">
+      <View className="flex-1 justify-center items-center bg-red-500">
         <View className="bg-white w-4/5 p-6 rounded-lg">
           <Text className="text-lg font-bold mb-4">{title}</Text>
           <TextInput
@@ -41,7 +41,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
           />
           <View className="flex-row justify-end space-x-4">
             <TouchableOpacity
-              className="px-4 py-2 rounded-md bg-black"
+              className="px-4 py-2 rounded-md bg-gray-200"
               onPress={onClose}>
               <Text className="text-white">취소</Text>
             </TouchableOpacity>
